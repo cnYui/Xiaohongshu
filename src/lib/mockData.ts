@@ -47,7 +47,7 @@ export const personas: PersonaCandidate[] = [
     summary: '你更容易被有温度的细节打动，适合在安静场域里建立连接。',
     mood: '低刺激高共鸣',
     traits: ['夜游者', '慢反馈', '偏爱真诚'],
-    color: 'linear-gradient(135deg, #dbeafe 0%, #ffffff 100%)',
+    color: 'linear-gradient(135deg, #F2F2F7 0%, #ffffff 100%)',
   },
   {
     id: 'citrus',

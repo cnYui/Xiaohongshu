@@ -204,12 +204,12 @@ onMounted(async () => {
     <div class="flex h-[100dvh] flex-col">
       <!-- 顶栏 -->
       <header class="flex items-center gap-3 px-5 py-4">
-        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[#0071e3]/10">
-          <span class="material-symbols-outlined text-[18px] text-[#0071e3]">auto_awesome</span>
+        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-[#9B8EC4]/10">
+          <span class="material-symbols-outlined text-[18px] text-[#9B8EC4]">auto_awesome</span>
         </div>
         <div class="flex-1">
-          <p class="text-[15px] font-medium text-[#1d1d1f]" style="letter-spacing: -0.224px">Zoopia Guide</p>
-          <p class="text-[11px] text-[#86868b]" style="letter-spacing: -0.08px">正在了解你的社交偏好</p>
+          <p class="text-[15px] font-medium text-[#1D1D1F]" style="letter-spacing: -0.224px">Zoopia Guide</p>
+          <p class="text-[11px] text-[#8E8E93]" style="letter-spacing: -0.08px">正在了解你的社交偏好</p>
         </div>
         <div class="flex items-center gap-1.5 rounded-full bg-[#30d158]/10 px-2.5 py-1">
           <div class="h-1.5 w-1.5 rounded-full bg-[#30d158]" />
@@ -227,7 +227,7 @@ onMounted(async () => {
         >
           <!-- AI 头像 -->
           <div v-if="msg.role === 'ai'" class="mr-2 flex-shrink-0 mt-5">
-            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#0071e3] to-[#5856d6]">
+            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#9B8EC4] to-[#6BBFA3]">
               <span class="material-symbols-outlined text-white text-[14px]" style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 14">auto_awesome</span>
             </div>
           </div>
@@ -237,8 +237,8 @@ onMounted(async () => {
               class="rounded-2xl px-4 py-3 text-[15px] leading-relaxed"
               :class="
                 msg.role === 'user'
-                  ? 'bg-[#0071e3] text-white rounded-br-md'
-                  : 'bg-[#f5f5f7] text-[#1d1d1f] rounded-bl-md'
+                  ? 'bg-[#9B8EC4] text-white rounded-br-md'
+                  : 'bg-[#F2F2F7] text-[#1D1D1F] rounded-bl-md'
               "
               style="letter-spacing: -0.224px"
             >
@@ -250,15 +250,15 @@ onMounted(async () => {
         <!-- AI 正在输入 -->
         <div v-if="isAiTyping" class="flex items-start gap-2">
           <div class="flex-shrink-0 mt-0.5">
-            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#0071e3] to-[#5856d6]">
+            <div class="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-[#9B8EC4] to-[#6BBFA3]">
               <span class="material-symbols-outlined text-white text-[14px]" style="font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 14">auto_awesome</span>
             </div>
           </div>
-          <div class="rounded-2xl rounded-bl-md bg-[#f5f5f7] px-4 py-3">
+          <div class="rounded-2xl rounded-bl-md bg-[#F2F2F7] px-4 py-3">
             <div class="flex items-center gap-1">
-              <div class="h-2 w-2 rounded-full bg-[#86868b]/40 animate-[bounce_1.4s_ease-in-out_infinite]" />
-              <div class="h-2 w-2 rounded-full bg-[#86868b]/40 animate-[bounce_1.4s_ease-in-out_0.2s_infinite]" />
-              <div class="h-2 w-2 rounded-full bg-[#86868b]/40 animate-[bounce_1.4s_ease-in-out_0.4s_infinite]" />
+              <div class="h-2 w-2 rounded-full bg-[#8E8E93]/40 animate-[bounce_1.4s_ease-in-out_infinite]" />
+              <div class="h-2 w-2 rounded-full bg-[#8E8E93]/40 animate-[bounce_1.4s_ease-in-out_0.2s_infinite]" />
+              <div class="h-2 w-2 rounded-full bg-[#8E8E93]/40 animate-[bounce_1.4s_ease-in-out_0.4s_infinite]" />
             </div>
           </div>
         </div>
@@ -267,7 +267,7 @@ onMounted(async () => {
       </section>
 
       <!-- 底部输入区 -->
-      <section class="border-t border-[#e8e8ed]/60 bg-white px-5 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3">
+      <section class="border-t border-[#E5E5EA]/60 bg-white px-5 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3">
         <div class="flex items-center gap-2.5">
           <!-- 语音输入 -->
           <button
@@ -276,7 +276,7 @@ onMounted(async () => {
             class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-all"
             :class="isRecording
               ? 'bg-[#ff3b30] text-white animate-[voice-pulse_1.2s_ease-in-out_infinite]'
-              : 'bg-[#f5f5f7] text-[#86868b] active:bg-[#e8e8ed]'"
+              : 'bg-[#F2F2F7] text-[#8E8E93] active:bg-[#E5E5EA]'"
             :disabled="isAiTyping"
             @click="toggleRecording"
           >
@@ -289,7 +289,7 @@ onMounted(async () => {
           <input
             v-model="inputText"
             type="text"
-            class="flex-1 rounded-full bg-[#f5f5f7] px-4 py-2.5 text-[15px] text-[#1d1d1f] outline-none placeholder:text-[#86868b]/60 transition-shadow focus:shadow-[0_0_0_2px_rgba(0,113,227,0.3)]"
+            class="flex-1 rounded-full bg-[#F2F2F7] px-4 py-2.5 text-[15px] text-[#1D1D1F] outline-none placeholder:text-[#8E8E93]/60 transition-shadow focus:shadow-[0_0_0_2px_rgba(155,142,196,0.3)]"
             style="letter-spacing: -0.224px"
             :placeholder="isRecording ? '正在聆听...' : '说说你的想法...'"
             :disabled="isAiTyping"
@@ -300,7 +300,7 @@ onMounted(async () => {
           <button
             type="button"
             class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-all"
-            :class="canSend() ? 'bg-[#0071e3] text-white active:scale-90' : 'bg-[#e8e8ed] text-[#86868b]/40'"
+            :class="canSend() ? 'bg-[#9B8EC4] text-white active:scale-90' : 'bg-[#E5E5EA] text-[#8E8E93]/40'"
             :disabled="!canSend()"
             @click="handleSend"
           >

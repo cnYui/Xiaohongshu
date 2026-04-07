@@ -53,21 +53,21 @@ onUnmounted(() => {
   <main class="device-shell">
     <div class="page-padding flex min-h-[100dvh] flex-col justify-between">
       <header class="pt-6">
-        <p class="text-center text-[12px] text-[#86868b]" style="letter-spacing: -0.12px">Zoopia 正在生成入场人格</p>
+        <p class="text-center text-[12px] text-[#8E8E93]" style="letter-spacing: -0.12px">Zoopia 正在为你创造分身</p>
       </header>
 
       <section class="flex flex-1 flex-col items-center justify-center gap-10">
         <!-- 旋转加载 -->
         <div class="relative flex h-28 w-28 items-center justify-center">
-          <div class="absolute inset-0 rounded-full border border-[#e8e8ed]" />
-          <div class="absolute inset-[14px] rounded-full border border-[#e8e8ed]" />
-          <div class="h-20 w-20 rounded-full border-[3px] border-[#f5f5f7] border-t-[#0071e3] animate-[spin-smooth_1.2s_linear_infinite]" />
-          <div class="absolute h-3 w-3 rounded-full bg-[#0071e3] shadow-[0_0_18px_rgba(0,113,227,0.75)]" />
+          <div class="absolute inset-0 rounded-full border border-[#E5E5EA]" />
+          <div class="absolute inset-[14px] rounded-full border border-[#E5E5EA]" />
+          <div class="h-20 w-20 rounded-full border-[3px] border-[#F2F2F7] border-t-[#1D1D1F] animate-[spin-smooth_1.2s_linear_infinite]" />
+          <div class="absolute h-3 w-3 rounded-full bg-[#1D1D1F]" />
         </div>
 
         <div class="space-y-3 text-center">
-          <p class="text-[21px] font-normal text-[#1d1d1f]" style="letter-spacing: 0.231px">正在建立你的情绪盲盒身份</p>
-          <p class="min-h-6 text-[14px] text-[#86868b] transition-opacity duration-300" style="letter-spacing: -0.224px">
+          <p class="text-[21px] font-normal text-[#1D1D1F]" style="letter-spacing: -0.3px">正在生成你的分身</p>
+          <p class="min-h-6 text-[14px] text-[#8E8E93] transition-opacity duration-300" style="letter-spacing: -0.224px">
             {{ activeHint }}
           </p>
         </div>
@@ -75,13 +75,13 @@ onUnmounted(() => {
 
       <footer class="space-y-4">
         <!-- 进度条 -->
-        <div class="h-1.5 overflow-hidden rounded-full bg-[#e8e8ed]">
+        <div class="h-1.5 overflow-hidden rounded-full bg-[#E5E5EA]">
           <div
-            class="h-full rounded-full bg-[#0071e3] transition-[width] duration-300"
+            class="h-full rounded-full bg-[#1D1D1F] transition-[width] duration-300"
             :style="{ width: `${progress}%` }"
           />
         </div>
-        <div class="flex items-center justify-between text-[12px] text-[#86868b]" style="letter-spacing: -0.12px">
+        <div class="flex items-center justify-between text-[12px] text-[#8E8E93]" style="letter-spacing: -0.12px">
           <span>解析中</span>
           <span>{{ progress }}%</span>
         </div>
