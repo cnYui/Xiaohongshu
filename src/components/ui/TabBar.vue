@@ -14,8 +14,8 @@ const router = useRouter()
 
 const tabs: TabItem[] = [
   { label: '探索', icon: 'explore', to: '/map', matches: /^\/(map|poi|discovery|reveal)/ },
-  { label: '社交', icon: 'forum', to: '/match', matches: /^\/(match|report)/ },
   { label: '状态', icon: 'person', to: '/profile', matches: /^\/(profile|history)/ },
+  { label: '社交', icon: 'forum', to: '/match', matches: /^\/(match|report)/ },
 ]
 
 const activePath = computed(() => route.path)

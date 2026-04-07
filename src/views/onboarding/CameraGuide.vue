@@ -60,7 +60,7 @@ const skipToConfirm = () => {
         <!-- 快门按钮 -->
         <button
           type="button"
-          class="flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[#9B8EC4] shadow-[0_18px_40px_rgba(155,142,196,0.25)] active:scale-90 transition-transform"
+          class="flex h-[74px] w-[74px] items-center justify-center rounded-full bg-[#1D1D1F] shadow-[0_18px_40px_rgba(0,0,0,0.18)] active:scale-90 transition-transform"
           aria-label="开始拍摄"
           @click="startCapture"
         >

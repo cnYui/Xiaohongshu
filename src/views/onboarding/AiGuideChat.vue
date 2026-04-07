@@ -173,6 +173,25 @@ const toggleRecording = () => {
   }
 }
 
+// 长按开始录音
+const startRecording = () => {
+  if (!recognition || isAiTyping.value) return
+  inputText.value = ''
+  try {
+    recognition.start()
+    isRecording.value = true
+  } catch {
+    // 忽略重复启动错误
+  }
+}
+
+// 松开停止录音（自动发送）
+const stopRecording = () => {
+  if (!recognition || !isRecording.value) return
+  recognition.stop()
+  isRecording.value = false
+}
+
 onBeforeUnmount(() => {
   if (recognition) {
     recognition.onend = null
@@ -237,7 +256,7 @@ onMounted(async () => {
               class="rounded-2xl px-4 py-3 text-[15px] leading-relaxed"
               :class="
                 msg.role === 'user'
-                  ? 'bg-[#9B8EC4] text-white rounded-br-md'
+                  ? 'bg-[#1D1D1F] text-white rounded-br-md'
                   : 'bg-[#F2F2F7] text-[#1D1D1F] rounded-bl-md'
               "
               style="letter-spacing: -0.224px"
@@ -266,41 +285,57 @@ onMounted(async () => {
         <div ref="chatEndRef" />
       </section>
 
-      <!-- 底部输入区 -->
+      <!-- 底部长按语音输入区 -->
       <section class="border-t border-[#E5E5EA]/60 bg-white px-5 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3">
-        <div class="flex items-center gap-2.5">
-          <!-- 语音输入 -->
-          <button
-            v-if="speechSupported"
-            type="button"
-            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-all"
-            :class="isRecording
-              ? 'bg-[#ff3b30] text-white animate-[voice-pulse_1.2s_ease-in-out_infinite]'
-              : 'bg-[#F2F2F7] text-[#8E8E93] active:bg-[#E5E5EA]'"
-            :disabled="isAiTyping"
-            @click="toggleRecording"
-          >
-            <span class="material-symbols-outlined text-[20px]">
-              {{ isRecording ? 'stop' : 'mic' }}
-            </span>
-          </button>
+        <!-- 长按语音长条按钮 -->
+        <button
+          v-if="speechSupported"
+          type="button"
+          class="flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-[15px] font-medium transition-all select-none"
+          :class="isRecording
+            ? 'bg-[#1D1D1F] text-white'
+            : 'bg-[#F2F2F7] text-[#8E8E93] active:bg-[#E5E5EA]'"
+          :disabled="isAiTyping"
+          style="letter-spacing: -0.224px"
+          @mousedown="startRecording"
+          @mouseup="stopRecording"
+          @mouseleave="stopRecording"
+          @touchstart.prevent="startRecording"
+          @touchend.prevent="stopRecording"
+        >
+          <!-- 录音中：音波动画 + 松开发送提示 -->
+          <template v-if="isRecording">
+            <div class="flex items-center gap-0.5">
+              <div class="h-3 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_infinite]" />
+              <div class="h-4 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.15s_infinite]" />
+              <div class="h-2 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.3s_infinite]" />
+              <div class="h-5 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.45s_infinite]" />
+              <div class="h-3 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.6s_infinite]" />
+            </div>
+            <span>松开发送</span>
+          </template>
+          <!-- 默认状态 -->
+          <template v-else>
+            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 18">mic</span>
+            <span>{{ isAiTyping ? '等待回复...' : '按住说话' }}</span>
+          </template>
+        </button>
 
-          <!-- 输入框 -->
+        <!-- 不支持语音时：显示输入框回退方案 -->
+        <div v-else class="flex items-center gap-2.5">
           <input
             v-model="inputText"
             type="text"
-            class="flex-1 rounded-full bg-[#F2F2F7] px-4 py-2.5 text-[15px] text-[#1D1D1F] outline-none placeholder:text-[#8E8E93]/60 transition-shadow focus:shadow-[0_0_0_2px_rgba(155,142,196,0.3)]"
+            class="flex-1 rounded-full bg-[#F2F2F7] px-4 py-2.5 text-[15px] text-[#1D1D1F] outline-none placeholder:text-[#8E8E93]/60"
             style="letter-spacing: -0.224px"
-            :placeholder="isRecording ? '正在聆听...' : '说说你的想法...'"
+            placeholder="说说你的想法..."
             :disabled="isAiTyping"
             @keyup.enter="handleSend"
           />
-
-          <!-- 发送 -->
           <button
             type="button"
             class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-all"
-            :class="canSend() ? 'bg-[#9B8EC4] text-white active:scale-90' : 'bg-[#E5E5EA] text-[#8E8E93]/40'"
+            :class="canSend() ? 'bg-[#1D1D1F] text-white active:scale-90' : 'bg-[#E5E5EA] text-[#8E8E93]/40'"
             :disabled="!canSend()"
             @click="handleSend"
           >
@@ -318,8 +353,8 @@ onMounted(async () => {
   30% { transform: translateY(-4px); }
 }
 
-@keyframes voice-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(255, 59, 48, 0); }
+@keyframes voice-bar {
+  0%, 100% { transform: scaleY(0.4); }
+  50% { transform: scaleY(1); }
 }
 </style>

@@ -2,6 +2,17 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+const avatarUrl = ref('/avatars/4c4eae51-6996-40bf-b175-5a2e692a1301.jpg')
+const avatarIndex = ref(0)
+
+const avatarOptions = [
+  '/avatars/4c4eae51-6996-40bf-b175-5a2e692a1301.jpg',
+  '/avatars/404b0503-83e0-45a3-8a03-9c222e2bdc32.jpg',
+  '/avatars/88a1e9e7-378f-4108-b288-c713865a7b03.jpg',
+  '/avatars/9a8b14f1-9e17-4b8b-a85c-20fbdd5d1cb0.jpg',
+  '/avatars/012fe965-2bf7-4b71-8c21-347f0999ef33.jpg',
+]
+
 const router = useRouter()
 const nickname = ref('')
 const isSpinning = ref(false)
@@ -15,6 +26,8 @@ const handleConfirm = () => {
 const handleRegenerate = () => {
   isSpinning.value = true
   setTimeout(() => {
+    avatarIndex.value = (avatarIndex.value + 1) % avatarOptions.length
+    avatarUrl.value = avatarOptions[avatarIndex.value]
     isSpinning.value = false
   }, 1200)
 }
@@ -39,14 +52,13 @@ const handleRegenerate = () => {
           :class="isSpinning ? 'animate-[spin-3d_1.2s_ease-in-out]' : ''"
           style="perspective: 800px;"
         >
-          <div class="relative flex h-[180px] w-[180px] items-center justify-center">
-            <!-- 中心形象 -->
-            <div class="flex h-[110px] w-[110px] items-center justify-center rounded-full bg-gradient-to-br from-[#F2F2F7] to-[#E5E5EA] shadow-[rgba(0,0,0,0.08)_0_4px_16px_0px]">
-              <span
-                class="material-symbols-outlined text-[48px] text-[#8E8E93]/50"
-                style="font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 48"
-              >smart_toy</span>
-            </div>
+          <div class="relative flex h-[220px] w-[180px] items-end justify-center">
+            <!-- 人物形象（完整立绘） -->
+            <img
+              :src="avatarUrl"
+              alt="分身形象"
+              class="h-full w-auto object-contain drop-shadow-[0_4px_20px_rgba(0,0,0,0.10)]"
+            />
           </div>
         </div>
 
