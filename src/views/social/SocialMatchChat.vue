@@ -3,7 +3,7 @@ import { nextTick, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { matchChat } from '../../lib/mockData'
 
-const props = defineProps<{
+defineProps<{
   visible: boolean
 }>()
 

@@ -11,11 +11,6 @@ const closeMatchChat = () => {
   showMatchChat.value = false
   void router.push('/map')
 }
-
-const goToReport = () => {
-  showMatchChat.value = false
-  void router.push('/report')
-}
 </script>
 
 <template>

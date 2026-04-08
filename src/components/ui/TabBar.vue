@@ -2,25 +2,35 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+type MainTabKey = 'explore' | 'status' | 'social'
+
 interface TabItem {
+  key: MainTabKey
   label: string
   icon: string
   to: string
-  matches: RegExp
 }
 
 const route = useRoute()
 const router = useRouter()
 
 const tabs: TabItem[] = [
-  { label: '探索', icon: 'explore', to: '/map', matches: /^\/(map|poi|discovery|reveal)/ },
-  { label: '状态', icon: 'person', to: '/profile', matches: /^\/(profile|history)/ },
-  { label: '社交', icon: 'forum', to: '/match', matches: /^\/(match|report)/ },
+  { key: 'explore', label: '探索', icon: 'explore', to: '/map' },
+  { key: 'status', label: '状态', icon: 'person', to: '/profile' },
+  { key: 'social', label: '社交', icon: 'forum', to: '/match' },
 ]
 
-const activePath = computed(() => route.path)
+const activeTab = computed<MainTabKey | null>(() => {
+  const matchedWithTab = [...route.matched].reverse().find((record) => {
+    const tab = record.meta.tab
+    return tab === 'explore' || tab === 'status' || tab === 'social'
+  })
 
-const isActive = (tab: TabItem) => tab.matches.test(activePath.value)
+  const tab = matchedWithTab?.meta.tab
+  return tab === 'explore' || tab === 'status' || tab === 'social' ? tab : null
+})
+
+const isActive = (tab: TabItem) => activeTab.value === tab.key
 
 const navigate = (to: string) => {
   if (route.path !== to) {

@@ -10,9 +10,11 @@ import { poiList } from '../../lib/mockData'
 // 禁用 Web Worker，在主线程运行，彻底绕开 CSP eval 限制
 ;(mapboxgl as any).workerUrl = ''
 
+type MapboxMap = InstanceType<typeof mapboxgl.Map>
+
 const router = useRouter()
 const mapContainer = ref<HTMLDivElement | null>(null)
-const map = ref<mapboxgl.Map | null>(null)
+const map = ref<MapboxMap | null>(null)
 const showSearch = ref(false)
 const searchQuery = ref('')
 const activeMood = ref<string | null>(null)
@@ -82,7 +84,8 @@ const locateUser = () => {
 
 // 创建 POI Marker
 const createPoiMarker = (poi: typeof poiList[number]) => {
-  if (!map.value) return
+  const currentMap = map.value
+  if (!currentMap) return
   const coords = poiCoords[poi.id] ?? MAP_CENTER
   const color = getPoiColor(poi.id)
 
@@ -98,9 +101,9 @@ const createPoiMarker = (poi: typeof poiList[number]) => {
   el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)' })
   el.addEventListener('click', () => openPoi(poi.id))
 
-  new mapboxgl.Marker({ element: el })
-    .setLngLat(coords)
-    .addTo(map.value)
+  const marker = new mapboxgl.Marker({ element: el }) as mapboxgl.Marker
+  marker.setLngLat(coords)
+  ;(marker as { addTo: (mapInstance: unknown) => void }).addTo(currentMap)
 }
 
 // 情绪筛选时过滤 POI

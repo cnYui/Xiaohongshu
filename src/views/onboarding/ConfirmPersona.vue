@@ -9,9 +9,8 @@ const avatarOptions = [
   '/avatars/4c4eae51-6996-40bf-b175-5a2e692a1301.jpg',
   '/avatars/404b0503-83e0-45a3-8a03-9c222e2bdc32.jpg',
   '/avatars/88a1e9e7-378f-4108-b288-c713865a7b03.jpg',
-  '/avatars/9a8b14f1-9e17-4b8b-a85c-20fbdd5d1cb0.jpg',
   '/avatars/012fe965-2bf7-4b71-8c21-347f0999ef33.jpg',
-]
+] as const
 
 const router = useRouter()
 const nickname = ref('')
@@ -27,7 +26,7 @@ const handleRegenerate = () => {
   isSpinning.value = true
   setTimeout(() => {
     avatarIndex.value = (avatarIndex.value + 1) % avatarOptions.length
-    avatarUrl.value = avatarOptions[avatarIndex.value]
+    avatarUrl.value = avatarOptions[avatarIndex.value] ?? '/avatars/4c4eae51-6996-40bf-b175-5a2e692a1301.jpg'
     isSpinning.value = false
   }, 1200)
 }

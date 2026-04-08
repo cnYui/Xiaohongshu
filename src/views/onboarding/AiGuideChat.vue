@@ -10,28 +10,39 @@ interface Message {
   text: string
 }
 
+type InputMode = 'voice' | 'text'
+
+interface BrowserSpeechRecognitionEvent {
+  results: SpeechRecognitionResultList
+}
+
+interface BrowserSpeechRecognition {
+  lang: string
+  interimResults: boolean
+  continuous: boolean
+  onresult: ((event: BrowserSpeechRecognitionEvent) => void) | null
+  onend: (() => void) | null
+  onerror: (() => void) | null
+  start: () => void
+  stop: () => void
+}
+
+type SpeechRecognitionConstructor = new () => BrowserSpeechRecognition
+
 const messages = ref<Message[]>([])
 const inputText = ref('')
+const inputMode = ref<InputMode>('voice')
 const isAiTyping = ref(false)
 const chatEndRef = ref<HTMLDivElement | null>(null)
 
 // 语音输入
 const isRecording = ref(false)
 const speechSupported = ref(false)
-let recognition: SpeechRecognition | null = null
+let recognition: BrowserSpeechRecognition | null = null
 
 let msgId = 0
 let userReplyCount = 0
 let initialized = false
-
-// ---- LLM 对话 ----
-const SYSTEM_PROMPT = `你是 Zoopia 的 AI 向导，正在通过自然对话了解用户的社交偏好，以便为ta生成一个情绪分身。
-规则：
-- 每次只问一个问题，语气轻松自然，像朋友聊天
-- 问题围绕社交场景偏好、陌生人接触方式、情绪表达习惯、对分身的期望
-- 根据用户的回答灵活追问，大约 3-5 轮后收尾
-- 当你觉得已经足够了解用户时，回复以 [DONE] 开头，后面跟一句简短的总结（如"[DONE] 了解你了！正在为你生成专属分身..."）
-- 不要使用列表或编号，口语化回答`
 
 const mockFollowUps = [
   '你平时更喜欢怎样的社交场景呀？',
@@ -48,7 +59,7 @@ const mockFollowUps = [
 const sendMessageToLLM = async (_userText: string): Promise<string> => {
   // ---- mock 模式（后端 API 就绪后替换此处） ----
   const index = Math.min(userReplyCount, mockFollowUps.length - 1)
-  const reply = mockFollowUps[index]
+  const reply = mockFollowUps[index] ?? mockFollowUps[mockFollowUps.length - 1] ?? '了解你了，我们继续。'
 
   return new Promise((resolve) => {
     setTimeout(() => resolve(reply), 600 + Math.random() * 800)
@@ -122,54 +133,57 @@ const canSend = () => {
   return inputText.value.trim().length > 0 && !isAiTyping.value
 }
 
+const switchToTextMode = () => {
+  if (isRecording.value && recognition) {
+    recognition.stop()
+    isRecording.value = false
+  }
+
+  inputMode.value = 'text'
+}
+
+const switchToVoiceMode = () => {
+  if (!speechSupported.value) return
+  inputMode.value = 'voice'
+}
+
 // ---- 语音输入 ----
 const initSpeechRecognition = () => {
-  const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+  const SpeechRecognitionAPI = ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition) as SpeechRecognitionConstructor | undefined
   if (!SpeechRecognitionAPI) {
     speechSupported.value = false
+    inputMode.value = 'text'
     return
   }
 
   speechSupported.value = true
+  inputMode.value = 'voice'
   recognition = new SpeechRecognitionAPI()
   recognition.lang = 'zh-CN'
   recognition.interimResults = true
   recognition.continuous = false
 
-  recognition.onresult = (event: SpeechRecognitionEvent) => {
+  recognition.onresult = (event: BrowserSpeechRecognitionEvent) => {
     let transcript = ''
     for (let i = 0; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript
+      const result = event.results[i]
+      const alternative = result?.[0]
+      if (alternative) {
+        transcript += alternative.transcript
+      }
     }
     inputText.value = transcript
   }
 
   recognition.onend = () => {
     isRecording.value = false
-    if (inputText.value.trim()) {
+    if (inputMode.value === 'voice' && inputText.value.trim()) {
       handleSend()
     }
   }
 
   recognition.onerror = () => {
     isRecording.value = false
-  }
-}
-
-const toggleRecording = () => {
-  if (!recognition || isAiTyping.value) return
-
-  if (isRecording.value) {
-    recognition.stop()
-    isRecording.value = false
-  } else {
-    inputText.value = ''
-    try {
-      recognition.start()
-      isRecording.value = true
-    } catch {
-      // 忽略重复启动错误
-    }
   }
 }
 
@@ -285,44 +299,61 @@ onMounted(async () => {
         <div ref="chatEndRef" />
       </section>
 
-      <!-- 底部长按语音输入区 -->
+      <!-- 底部输入区 -->
       <section class="border-t border-[#E5E5EA]/60 bg-white px-5 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-3">
-        <!-- 长按语音长条按钮 -->
-        <button
-          v-if="speechSupported"
-          type="button"
-          class="flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-[15px] font-medium transition-all select-none"
-          :class="isRecording
-            ? 'bg-[#1D1D1F] text-white'
-            : 'bg-[#F2F2F7] text-[#8E8E93] active:bg-[#E5E5EA]'"
-          :disabled="isAiTyping"
-          style="letter-spacing: -0.224px"
-          @mousedown="startRecording"
-          @mouseup="stopRecording"
-          @mouseleave="stopRecording"
-          @touchstart.prevent="startRecording"
-          @touchend.prevent="stopRecording"
-        >
-          <!-- 录音中：音波动画 + 松开发送提示 -->
-          <template v-if="isRecording">
-            <div class="flex items-center gap-0.5">
-              <div class="h-3 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_infinite]" />
-              <div class="h-4 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.15s_infinite]" />
-              <div class="h-2 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.3s_infinite]" />
-              <div class="h-5 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.45s_infinite]" />
-              <div class="h-3 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.6s_infinite]" />
-            </div>
-            <span>松开发送</span>
-          </template>
-          <!-- 默认状态 -->
-          <template v-else>
-            <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 18">mic</span>
-            <span>{{ isAiTyping ? '等待回复...' : '按住说话' }}</span>
-          </template>
-        </button>
+        <div v-if="inputMode === 'voice'" class="flex items-center gap-2.5">
+          <button
+            type="button"
+            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#F2F2F7] text-[#8E8E93] transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+            :disabled="isAiTyping"
+            aria-label="切换到打字输入"
+            @click="switchToTextMode"
+          >
+            <span class="material-symbols-outlined text-[18px]">keyboard</span>
+          </button>
 
-        <!-- 不支持语音时：显示输入框回退方案 -->
+          <button
+            type="button"
+            class="flex flex-1 items-center justify-center gap-2 rounded-full py-3.5 text-[15px] font-medium transition-all select-none"
+            :class="isRecording
+              ? 'bg-[#1D1D1F] text-white'
+              : 'bg-[#F2F2F7] text-[#8E8E93] active:bg-[#E5E5EA]'"
+            :disabled="isAiTyping || !speechSupported"
+            style="letter-spacing: -0.224px"
+            @mousedown="startRecording"
+            @mouseup="stopRecording"
+            @mouseleave="stopRecording"
+            @touchstart.prevent="startRecording"
+            @touchend.prevent="stopRecording"
+          >
+            <template v-if="isRecording">
+              <div class="flex items-center gap-0.5">
+                <div class="h-3 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_infinite]" />
+                <div class="h-4 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.15s_infinite]" />
+                <div class="h-2 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.3s_infinite]" />
+                <div class="h-5 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.45s_infinite]" />
+                <div class="h-3 w-[3px] rounded-full bg-white/80 animate-[voice-bar_0.8s_ease-in-out_0.6s_infinite]" />
+              </div>
+              <span>松开发送</span>
+            </template>
+            <template v-else>
+              <span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 18">mic</span>
+              <span>{{ isAiTyping ? '等待回复...' : '按住说话' }}</span>
+            </template>
+          </button>
+        </div>
+
         <div v-else class="flex items-center gap-2.5">
+          <button
+            type="button"
+            class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#F2F2F7] text-[#8E8E93] transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+            :disabled="isAiTyping || !speechSupported"
+            aria-label="切换到语音输入"
+            @click="switchToVoiceMode"
+          >
+            <span class="material-symbols-outlined text-[18px]">mic</span>
+          </button>
+
           <input
             v-model="inputText"
             type="text"
